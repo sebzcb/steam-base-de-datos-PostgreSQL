@@ -254,3 +254,195 @@ CREATE TABLE IF NOT EXISTS public.tags
 );
 
 
+/*AGREGAR ATRIBUTOS QUE DESPUES SERAN FKS EN LAS TABLAS */
+
+ALTER TABLE juegos ADD COLUMN id_descargas_rangos INTEGER NOT NULL;
+ALTER TABLE juegos ADD COLUMN id_edad_minima INTEGER NOT NULL;
+ALTER TABLE juegos ADD COLUMN id_descuento INTEGER NOT NULL;
+
+ALTER TABLE juegopublicador ADD COLUMN id_app INTEGER NOT NULL;
+ALTER TABLE juegopublicador ADD COLUMN id_publicador INTEGER NOT NULL;
+
+ALTER TABLE juegodesarrollador ADD COLUMN id_app INTEGER NOT NULL;
+ALTER TABLE juegodesarrollador ADD COLUMN id_desarrollador INTEGER NOT NULL;
+
+ALTER TABLE juegotag ADD COLUMN id_app INTEGER NOT NULL;
+ALTER TABLE juegotag ADD COLUMN id_tag INTEGER NOT NULL;
+
+ALTER TABLE juegoplataforma ADD COLUMN id_app INTEGER NOT NULL;
+ALTER TABLE juegoplataforma ADD COLUMN id_plataforma INTEGER NOT NULL;
+
+ALTER TABLE juegogenero ADD COLUMN id_app INTEGER NOT NULL;
+ALTER TABLE juegogenero ADD COLUMN id_genero INTEGER NOT NULL;
+
+ALTER TABLE juegolenguaje ADD COLUMN id_app INTEGER NOT NULL;
+ALTER TABLE juegolenguaje ADD COLUMN id_lenguaje INTEGER NOT NULL;
+
+ALTER TABLE juegotipo ADD COLUMN id_app INTEGER NOT NULL;
+ALTER TABLE juegotipo ADD COLUMN id_tipo INTEGER NOT NULL;
+
+ALTER TABLE juegocategoria ADD COLUMN id_app INTEGER NOT NULL;
+ALTER TABLE juegocategoria ADD COLUMN id_categoria INTEGER NOT NULL;
+
+
+/*AHORA ASIGNAR LOS FKS CORRESPONDIENTES A CADA TABLA*/
+
+/*TABLA JUEGOS*/
+/*id_descargas_rangos*/
+ALTER TABLE IF EXISTS public.juegos
+    ADD CONSTRAINT fk_descargas_rangos FOREIGN KEY (id_descargas_rangos)
+    REFERENCES public.descargas_rangos (id_descargas_rangos) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+	
+/*id_edad_minima*/
+ALTER TABLE IF EXISTS public.juegos
+    ADD CONSTRAINT fk_edad_minima FOREIGN KEY (id_edad_minima)
+    REFERENCES public.edades_minimas (id_edades_minimas) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+	
+/*id_descuento*/
+ALTER TABLE IF EXISTS public.juegos
+    ADD CONSTRAINT fk_id_descuento FOREIGN KEY (id_descuento)
+    REFERENCES public.descuentos (id_descuentos) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+    	
+/*tabla juegopublicador*/
+ALTER TABLE IF EXISTS public.juegopublicador
+    ADD CONSTRAINT fk_id_app FOREIGN KEY (id_app)
+    REFERENCES public.juegos (id_app) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+ALTER TABLE IF EXISTS public.juegopublicador
+    ADD CONSTRAINT fk_id_publicador FOREIGN KEY (id_publicador)
+    REFERENCES public.publicadores (id_publicadores) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+/*tabla juegodesarrollador*/
+ALTER TABLE IF EXISTS public.juegodesarrollador
+    ADD CONSTRAINT fk_id_app FOREIGN KEY (id_app)
+    REFERENCES public.juegos (id_app) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+ALTER TABLE IF EXISTS public.juegodesarrollador
+    ADD CONSTRAINT fk_id_desarrollador FOREIGN KEY (id_desarrollador)
+    REFERENCES public.desarrolladores (id_desarrolladores) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+    	/*tabla juegotag*/
+ALTER TABLE IF EXISTS public.juegotag
+    ADD CONSTRAINT fk_id_app FOREIGN KEY (id_app)
+    REFERENCES public.juegos (id_app) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+ALTER TABLE IF EXISTS public.juegotag
+    ADD CONSTRAINT fk_id_tag FOREIGN KEY (id_tag)
+    REFERENCES public.tags (id_tag) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+    	
+		/*tabla juegoplataforma*/
+ALTER TABLE IF EXISTS public.juegoplataforma
+    ADD CONSTRAINT fk_id_app FOREIGN KEY (id_app)
+    REFERENCES public.juegos (id_app) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+ALTER TABLE IF EXISTS public.juegoplataforma
+    ADD CONSTRAINT fk_id_plataforma FOREIGN KEY (id_plataforma)
+    REFERENCES public.plataformas (id_plataforma) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+		
+		/*tabla juegogenero*/
+ALTER TABLE IF EXISTS public.juegogenero
+    ADD CONSTRAINT fk_id_app FOREIGN KEY (id_app)
+    REFERENCES public.juegos (id_app) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+ALTER TABLE IF EXISTS public.juegogenero
+    ADD CONSTRAINT fk_id_genero FOREIGN KEY (id_genero)
+    REFERENCES public.generos (id_genero) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+    	/*tabla juegolenguaje*/
+ALTER TABLE IF EXISTS public.juegolenguaje
+    ADD CONSTRAINT fk_id_app FOREIGN KEY (id_app)
+    REFERENCES public.juegos (id_app) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+ALTER TABLE IF EXISTS public.juegolenguaje
+    ADD CONSTRAINT fk_id_lenguaje FOREIGN KEY (id_lenguaje)
+    REFERENCES public.lenguajes (id_lenguaje) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+    		/*tabla juegotipo*/
+ALTER TABLE IF EXISTS public.juegotipo
+    ADD CONSTRAINT fk_id_app FOREIGN KEY (id_app)
+    REFERENCES public.juegos (id_app) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+/*CREA TABLA TIPO*/
+Create table tipos(
+	id_tipo INTEGER primary key,
+	tipo character varying (200) NOT NULL
+)
+ALTER TABLE IF EXISTS public.juegotipo
+    ADD CONSTRAINT fk_id_tipo FOREIGN KEY (id_tipo)
+    REFERENCES public.tipos (id_tipo) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+    		/*tabla juegocategorias*/
+ALTER TABLE IF EXISTS public.juegocategoria
+    ADD CONSTRAINT fk_id_app FOREIGN KEY (id_app)
+    REFERENCES public.juegos (id_app) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.juegocategoria
+    ADD CONSTRAINT fk_id_categoria FOREIGN KEY (id_categoria)
+    REFERENCES public.categorias (id_categorias) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
