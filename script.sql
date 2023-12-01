@@ -446,3 +446,72 @@ ALTER TABLE IF EXISTS public.juegocategoria
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
+
+/* INSERTA DATOS EN TABLA descargas_rangos*/
+INSERT INTO descargas_rangos(descarga_rango)
+SELECT DISTINCT descargas_rango
+FROM traspaso;
+
+/*inserta datos en tabla edades minimas*/
+INSERT INTO edades_minimas(edad_minima)
+select distinct edad_minima from traspaso;
+
+
+/*inserta datos en tabla descuento*/
+insert into descuentos(descuento)
+select distinct descuento from traspaso;
+
+/*PARAMETROS FUNCION: TEXTO A DIVIR, DELIMITADOR*/
+CREATE OR REPLACE FUNCTION public.split_text_to_rows(
+    text_to_split text,
+    delimiter text
+)
+RETURNS TABLE (split_value varchar(300)) AS
+$BODY$
+BEGIN
+    RETURN QUERY SELECT CAST(trim(regexp_split_to_table(text_to_split, delimiter)) AS varchar(300));
+END;
+$BODY$
+LANGUAGE plpgsql;
+
+/*ACTUALIZA DESARROLLADOR EN DONDE SEA NULL SE CAMBIA POR NINGUNO*/
+UPDATE traspaso
+SET desarrollador = COALESCE(desarrollador, 'ninguno')
+WHERE desarrollador IS NULL;
+
+/*ACTUALIZA PUBLICADOR EN DONDE SEA NULL SE CAMBIA POR NINGUNO*/
+UPDATE traspaso
+SET publicador = COALESCE(publicador, 'ninguno')
+WHERE publicador IS NULL;
+
+/*ACTUALIZA TAG EN DONDE SEA NULL SE CAMBIA POR NINGUNO*/
+UPDATE traspaso
+SET tags = COALESCE(tags, 'ninguno')
+WHERE tags IS NULL;
+
+/*ACTUALIZA genero EN DONDE SEA NULL SE CAMBIA POR NINGUNO*/
+UPDATE traspaso
+SET genero = COALESCE(genero, 'ninguno')
+WHERE genero IS NULL;
+
+/*ACTUALIZA lenguajes EN DONDE SEA NULL SE CAMBIA POR NINGUNO*/
+UPDATE traspaso
+SET lenguajes = COALESCE(lenguajes, 'ninguno')
+WHERE lenguajes IS NULL;
+/*ACTUALIZA categorias EN DONDE SEA NULL SE CAMBIA POR NINGUNO*/
+UPDATE traspaso
+SET categorias = COALESCE(categorias, 'ninguno')
+WHERE categorias IS NULL;
+
+/*inserto en tabla publicadores*/
+INSERT INTO publicadores (publicador)
+/*ejecuto funcion para separar por comas cada fila de publicador ya que existen casos donde hay mas de 2 publicadores en una misma fila*/
+SELECT DISTINCT split_text_to_rows(publicador, ', ')  
+FROM traspaso;
+
+/*inserto en tabla desarrolladores*/
+INSERT INTO desarrolladores(desarrollador)
+/*ejecuto funcion para separar por comas cada fila de publicador ya que existen casos donde hay mas de 2 desarrolladores en una misma fila*/
+SELECT DISTINCT split_text_to_rows(desarrollador, ', ')  
+FROM traspaso;
+
