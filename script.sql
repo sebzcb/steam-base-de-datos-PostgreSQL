@@ -1,3 +1,5 @@
+CREATE DATABASE steam;
+
 create table traspaso(
 	id_app integer primary key,
 	nombre varchar(300) ,
@@ -456,12 +458,12 @@ FROM traspaso;
 INSERT INTO edades_minimas(edad_minima)
 select distinct edad_minima from traspaso;
 
-
 /*inserta datos en tabla descuento*/
 insert into descuentos(descuento)
 select distinct descuento from traspaso;
 
-/*PARAMETROS FUNCION: TEXTO A DIVIR, DELIMITADOR*/
+/*PARAMETROS FUNCION: TEXTO A DIVIR, DELIMITADOR => retorna valores independientes, sin la coma.
+*/
 CREATE OR REPLACE FUNCTION public.split_text_to_rows(
     text_to_split text,
     delimiter text
@@ -503,6 +505,12 @@ UPDATE traspaso
 SET categorias = COALESCE(categorias, 'ninguno')
 WHERE categorias IS NULL;
 
+/*descripcion => Cambia valores null a "ninguno"*/
+UPDATE traspaso
+SET descripcion = COALESCE(descripcion, 'ninguno')
+WHERE descripcion IS NULL;
+
+
 /*inserto en tabla publicadores*/
 INSERT INTO publicadores (publicador)
 /*ejecuto funcion para separar por comas cada fila de publicador ya que existen casos donde hay mas de 2 publicadores en una misma fila*/
@@ -514,4 +522,114 @@ INSERT INTO desarrolladores(desarrollador)
 /*ejecuto funcion para separar por comas cada fila de publicador ya que existen casos donde hay mas de 2 desarrolladores en una misma fila*/
 SELECT DISTINCT split_text_to_rows(desarrollador, ', ')  
 FROM traspaso;
+/*renombra atributo*/
+ALTER TABLE juegos
+RENAME COLUMN feceha_salida TO fecha_salida;
+
+/*CAMBIA DE TIPO VARCHAR A INTEGER EN EDAD_MINIMA*/
+ALTER TABLE edades_minimas
+ALTER COLUMN edad_minima TYPE integer USING edad_minima::integer;
+
+
+/*SE INSERTAN DATOS A TABLA JUEGOS*/
+INSERT INTO juegos (id_app, juego, descripcion, reviews_positivas, reviews_negativas, ccu, fecha_salida, precio_inicial, precio_final,id_descargas_rangos,id_edad_minima,id_descuento)
+SELECT id_app, nombre, descripcion, reviews_positivas, reviews_negativas, ccu, fecha_salida, precio_inicial, precio_final
+,dr.id_descargas_rangos,em.id_edades_minimas,d.id_descuentos
+FROM traspaso t inner join descargas_rangos dr
+ON t.descargas_rango = dr.descarga_rango
+inner join edades_minimas em 
+ON t.edad_minima = em.edad_minima
+inner join descuentos d
+ON t.descuento = d.descuento;
+
+
+/*AGREGA DATOS A TABLA juegopublicador*/
+insert into juegopublicador (id_app,id_publicador)
+/*para ver cuales son distintos*/
+SELECT t.id_app,p.id_publicadores  FROM traspaso t 
+inner JOIN publicadores p
+ON p.publicador = ANY(STRING_TO_ARRAY(t.publicador, ','));
+
+
+insert into juegodesarrollador (id_app,id_desarrollador)
+/*para ver cuales son distintos*/
+SELECT t.id_app,d.id_desarrolladores  FROM traspaso t 
+inner JOIN desarrolladores d
+ON d.desarrollador = ANY(STRING_TO_ARRAY(t.desarrollador, ','));
+
+/*INSERTA DATOS A TABLA TAGS*/
+insert into tags(tag)
+select distinct split_text_to_rows(tags,',') from traspaso;
+/*INSERTA DATOS A PLATAFORMAS*/
+insert into plataformas(plataforma)
+select distinct split_text_to_rows(plataformas,',') from traspaso;
+
+/*INSERTA DATOS A PLATAFORMAS*/
+insert into plataformas(plataforma)
+select distinct split_text_to_rows(plataformas,',') from traspaso;
+
+/*INSERTA DATOS A TABLA GENEROS*/
+insert into generos(genero)
+select distinct split_text_to_rows(genero,',') from traspaso;
+/*cambio tipo de dato de lenguaje para no tener problemas*/
+ALTER TABLE lenguajes
+ALTER COLUMN lenguaje TYPE character varying(300);
+
+/*INSERTA DATOS A TABLA LENGUAJES*/
+insert into lenguajes(lenguaje)
+select distinct split_text_to_rows(lenguajes,',') from traspaso;
+
+
+/*inserta datos a tabla tipos , solo tiene 2 datos*/
+insert into tipos(id_tipo,tipo)
+SELECT  distinct 1, tipo from traspaso where tipo = 'game';
+
+insert into tipos(id_tipo,tipo)
+SELECT  distinct 2, tipo from traspaso where tipo = 'hardware';
+/*inserta datos a tabla categorias*/
+insert into categorias(categoria)
+select distinct split_text_to_rows(categorias,',') from traspaso;
+
+
+/*inserto datos a tabla juegocategoria*/
+insert into juegocategoria(id_app,id_categoria)
+
+SELECT t.id_app,c.id_categorias 
+FROM traspaso t 
+inner JOIN categorias c 
+ON c.categoria = ANY(STRING_TO_ARRAY(t.categorias, ','));
+
+
+/*inserto datos a tabla juegotipo*/
+insert into juegotipo(id_app,id_tipo)
+
+SELECT t.id_app,ti.id_tipo 
+FROM traspaso t 
+inner JOIN tipos ti 
+ON ti.tipo = t.tipo;
+
+
+/*inserto datos a tabla juegolenguaje*/
+insert into juegolenguaje(id_app,id_lenguaje)
+
+SELECT t.id_app,l.id_lenguaje 
+FROM traspaso t 
+inner JOIN lenguajes l
+ON l.lenguaje = ANY(STRING_TO_ARRAY(t.lenguajes, ','));
+
+
+/*inserto datos tabla juegogenero*/
+insert into juegogenero(id_app,id_genero)
+SELECT t.id_app,g.id_genero 
+FROM traspaso t 
+inner JOIN generos g
+ON g.genero = ANY(STRING_TO_ARRAY(t.genero, ','));
+
+/*inserto datos tabla juegoplataforma*/
+insert into juegoplataforma(id_app,id_plataforma)
+
+SELECT t.id_app,p.id_plataforma 
+FROM traspaso t 
+inner JOIN plataformas p
+ON p.plataforma = ANY(STRING_TO_ARRAY(t.plataformas, ','));
 
